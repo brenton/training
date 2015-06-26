@@ -1,91 +1,109 @@
 {
-  "apiVersion": "v1beta1",
-  "kind": "Config",
-  "items": [
-    {
-        "kind": "Service",
-        "id": "openldap-example-service",
-        "apiVersion": "v1beta1",
-        "namespace": "default",
-        "port": 389,
-        "protocol": "TCP",
-        "labels": {
-            "openldap-example": "openldap-example"
-        },
-        "selector": {
-            "name": "openldap-example"
-        },
-        "containerPort": 389,
-        "sessionAffinity": "None"
-    },
-    {
-        "kind": "DeploymentConfig",
-        "apiVersion": "v1beta1",
-        "metadata": {
+    "kind": "List",
+    "apiVersion": "v1",
+    "metadata": {},
+    "items": [
+        {
+          "kind": "DeploymentConfig",
+          "apiVersion": "v1beta3",
+          "metadata": {
             "name": "openldap-example",
-            "namespace": "default",
-            "labels": {
-                "name": "openldap-example"
-            }
-        },
-        "triggers": [
-            {
-                "type": "ConfigChange"
-            }
-        ],
-        "template": {
+            "creationTimestamp": null
+          },
+          "spec": {
             "strategy": {
-                "type": "Recreate"
+              "type": "Recreate",
+              "resources": {}
             },
-            "controllerTemplate": {
-                "replicas": 1,
-                "replicaSelector": {
+            "triggers": [
+              {
+                "type": "ImageChange",
+                "imageChangeParams": {
+                  "automatic": true,
+                  "containerNames": [
+                    "openldap-example"
+                  ],
+                  "from": {
+                    "kind": "ImageStreamTag",
+                    "name": "beta-openldap-example:latest",
+                    "namespace": "openshift"
+                  },
+                  "lastTriggeredImage": ""
+                }
+              },
+              {
+                "type": "ConfigChange"
+              }
+            ],
+            "replicas": 1,
+            "selector": {
+              "name": "openldap-example"
+            },
+            "template": {
+              "metadata": {
+                "creationTimestamp": null,
+                "labels": {
+                  "name": "openldap-example"
+                }
+              },
+              "spec": {
+                "containers": [
+                  {
+                    "name": "openldap-example",
+                    "image": "openshift/beta-openldap-example:latest",
+                    "ports": [
+                      {
+                        "containerPort": 389,
+                        "protocol": "TCP"
+                      }
+                    ],
+                    "env": [],
+                    "resources": {},
+                    "volumeMounts": [],
+                    "terminationMessagePath": "/dev/termination-log",
+                    "imagePullPolicy": "IfNotPresent",
+                    "capabilities": {},
+                    "securityContext": {
+                      "capabilities": {},
+                      "privileged": false
+                    }
+                  }
+                ],
+                "volumes": [],
+                "restartPolicy": "Always",
+                "dnsPolicy": "ClusterFirst"
+              }
+            }
+          },
+          "status": {}
+        },
+        {
+            "kind": "Service",
+            "apiVersion": "v1",
+            "metadata": {
+                "name": "openldap-example-service",
+                "labels": {
+                    "name": "openldap-example"
+                }
+            },
+            "spec": {
+                "ports": [
+                    {
+                        "protocol": "TCP",
+                        "port": 389,
+                        "targetPort": 389,
+                        "nodePort": 0
+                    }
+                ],
+                "selector": {
                     "name": "openldap-example"
                 },
-                "podTemplate": {
-                    "desiredState": {
-                        "manifest": {
-                            "version": "v1beta2",
-                            "id": "",
-                            "volumes": [],
-                            "containers": [
-                                {
-                                    "name": "openldap-example",
-                                    "image": "openshift/beta-openldap-example:latest",
-                                    "ports": [
-                                        {
-                                            "containerPort": 389,
-                                            "protocol": "TCP"
-                                        }
-                                    ],
-                                    "env": [],
-                                    "resources": {},
-                                    "volumeMounts": [],
-                                    "terminationMessagePath": "/dev/termination-log",
-                                    "imagePullPolicy": "PullIfNotPresent",
-                                    "capabilities": {}
-                                }
-                            ],
-                            "restartPolicy": {
-                                "always": {}
-                            },
-                            "dnsPolicy": "ClusterFirst"
-                        }
-                    },
-                    "labels": {
-                        "name": "openldap-example"
-                    }
-                }
+                "type": "ClusterIP",
+                "sessionAffinity": "None"
+            },
+            "status": {
+                "loadBalancer": {}
             }
-        },
-        "latestVersion": 1,
-        "details": {
-            "causes": [
-                {
-                    "type": "ConfigChange"
-                }
-            ]
         }
-    }
-  ]
+    ]
 }
